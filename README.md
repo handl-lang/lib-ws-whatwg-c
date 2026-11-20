@@ -2,14 +2,14 @@
 
 WHATWG WebSocket surface over the libcurl transport — the `ws-whatwg-c/http` module.
 
-Part of the `handl-lang` org split (ADR-0128). History is a `git subtree
-split` of the platform monorepo's `ws-whatwg-c/` (via `web`).
-
 ## Layout
 
 ```text
 src/        the .hnl sources
-pkg.hnl     dependencies, when any: `{ deps: { <name>: "branch:<ref>" } }`
+pkg.hnl     package manifest — modules, deps, description, license
+scripts/hnl-gate.sh   the gate
+scripts/curl_ws_check.py   live curl websocket check
+ci.sh       bupha entry
 ```
 
 ## Gate
