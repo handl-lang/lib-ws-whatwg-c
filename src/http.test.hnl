@@ -11,8 +11,9 @@ from "bytes" import * as bytes
 
 -- res_tag -- the `tag.tag_of` replacement for `ok`/`err` results
 -- (phase-3 WS-F nominal migration): dispatch is ctor-sym identity via
--- `match` -- the `err`/`ok` arms cover both the canonical `__ctor__`
--- mint and the host-minted `{"__tag__": ...}` envelope.
+-- `match` -- the `err`/`ok` arms cover the canonical `__ctor__` mint
+-- (`error.try` post-I-008, `result.ok`/`result.err`) and the legacy
+-- host-minted `{"__tag__": ...}` envelope.
 res_tag :: r ~> match r { ok(_): "ok", err(_): "err", _: "?" }
 test_upgrade_req := assert http.upgrade_req(
   { host: "127.0.0.1", port: 8080, path: "/chat" },
