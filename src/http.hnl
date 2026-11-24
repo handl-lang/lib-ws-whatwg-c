@@ -42,7 +42,7 @@ export GUID := "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 --- nat_of -- parse a non-empty digit string to an Int, or -1 when any
 --- char is not a digit. Internal; the callers add the range checks.
 nat_of := (s) ~> do {
-  n :: str.length(s)
+  n := str.length(s)
   if n == 0 {
     0 - 1
   } else {
@@ -55,7 +55,7 @@ nat_of := (s) ~> do {
         }
       } else {
         do {
-          c :: char.code_point_at(s, i)
+          c := char.code_point_at(s, i)
           if c >= 48 && c <= 57 {
             { state: { i: i + 1, acc: acc * 10 + (c - 48), bad: bad } }
           } else {
@@ -84,14 +84,14 @@ hex_val := (c) ~> if c >= 48 && c <= 57 {
 --- @param {s} - the hex string
 --- @returns {List Int - the decoded bytes}
 export hex_decode := (s) ~> do {
-  n :: str.length(s)
+  n := str.length(s)
   while { i: 0, acc: [] } {
     (i, acc) ~> if i + 1 >= n {
       { out: acc }
     } else {
       do {
-        hi :: hex_val(char.code_point_at(s, i))
-        lo :: hex_val(char.code_point_at(s, i + 1))
+        hi := hex_val(char.code_point_at(s, i))
+        lo := hex_val(char.code_point_at(s, i + 1))
         { state: { i: i + 2, acc: [...acc, hi * 16 + lo] } }
       }
     }
@@ -111,21 +111,21 @@ list_len := (xs) ~> while { xs: xs, n: 0 } {
 --- @param {bs} - the input bytes as a list of ints
 --- @returns {String - the base64 encoding}
 export b64_encode := (bs) ~> do {
-  alpha :: char.chars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
-  n :: list_len(bs)
+  alpha := char.chars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+  n := list_len(bs)
   while { i: 0, out: "" } {
     (i, out) ~> if i >= n {
       { out: out }
     } else {
       do {
-        b0 :: bs[i]
-        b1 :: if i + 1 < n { bs[i + 1] } else { 0 }
-        b2 :: if i + 2 < n { bs[i + 2] } else { 0 }
-        c0 :: math.shr(b0, 2)
-        c1 :: math.bit_or(math.shl(math.bit_and(b0, 3), 4), math.shr(b1, 4))
-        c2 :: math.bit_or(math.shl(math.bit_and(b1, 15), 2), math.shr(b2, 6))
-        c3 :: math.bit_and(b2, 63)
-        s :: out + alpha[c0] + alpha[c1] +
+        b0 := bs[i]
+        b1 := if i + 1 < n { bs[i + 1] } else { 0 }
+        b2 := if i + 2 < n { bs[i + 2] } else { 0 }
+        c0 := math.shr(b0, 2)
+        c1 := math.bit_or(math.shl(math.bit_and(b0, 3), 4), math.shr(b1, 4))
+        c2 := math.bit_or(math.shl(math.bit_and(b1, 15), 2), math.shr(b2, 6))
+        c3 := math.bit_and(b2, 63)
+        s := out + alpha[c0] + alpha[c1] +
              (if i + 1 < n { alpha[c2] } else { "=" }) +
              (if i + 2 < n { alpha[c3] } else { "=" })
         { state: { i: i + 3, out: s } }
@@ -177,7 +177,7 @@ export build_101_resp := (key) ~> (
 --- `HTTP/1.1 <code> <reason>` (the second whitespace-separated token),
 --- or -1 when it is not a digit string.
 status_of := (line0) ~> do {
-  ws :: str.split_whitespace(line0)
+  ws := str.split_whitespace(line0)
   match ws {
     [proto, code, ...tail]: nat_of(code),
     _: 0 - 1
@@ -191,13 +191,13 @@ headers_of := (rest) ~> while { xs: rest, acc: [] } {
   (xs, acc) ~> match xs {
     []: { out: acc },
     [h, ...t]: do {
-      c :: str.find(h, ":")
+      c := str.find(h, ":")
       if c < 0 {
         { state: { xs: t, acc: acc } }
       } else {
         do {
-          nm :: str.lower(str.trim(str.slice(h, 0, c)))
-          v :: str.trim(str.slice(h, c + 1, str.length(h)))
+          nm := str.lower(str.trim(str.slice(h, 0, c)))
+          v := str.trim(str.slice(h, c + 1, str.length(h)))
           { state: { xs: t, acc: [...acc, { name: nm, value: v }] } }
         }
       }
@@ -212,7 +212,7 @@ headers_of := (rest) ~> while { xs: rest, acc: [] } {
 --- @param {s} - the raw response head
 --- @returns {Head - { status: Int, headers: [{name, value}] }}
 export parse_head := (s) ~> do {
-  lines :: str.split(s, "\r\n")
+  lines := str.split(s, "\r\n")
   match lines {
     []: { status: 0, headers: [] },
     [line0, ...rest]: { status: status_of(line0), headers: headers_of(rest) }
@@ -227,7 +227,7 @@ export ReqHead := { method: String, headers: [Header] }
 --- line `<METHOD> <target> <proto>`, uppercased (so `get` and `GET`
 --- compare equal); the empty string when the line has no tokens.
 method_of := (line0) ~> do {
-  ws :: str.split_whitespace(line0)
+  ws := str.split_whitespace(line0)
   match ws {
     [m, ...tail]: str.upper(m),
     _: ""
@@ -241,7 +241,7 @@ method_of := (line0) ~> do {
 --- @param {s} - the raw request head
 --- @returns {ReqHead - { method: String, headers: [{name, value}] }}
 export parse_req_head := (s) ~> do {
-  lines :: str.split(s, "\r\n")
+  lines := str.split(s, "\r\n")
   match lines {
     []: { method: "", headers: [] },
     [line0, ...rest]: { method: method_of(line0), headers: headers_of(rest) }
@@ -272,13 +272,13 @@ export header_get := (headers, name) ~> while { xs: headers, want: str.lower(nam
 --- @param {token} - the list token to look for (any case)
 --- @returns {Bool}
 export header_has_token := (headers, name, token) ~> do {
-  v :: header_get(headers, name)
+  v := header_get(headers, name)
   if v == null {
     false
   } else {
     do {
-      want :: str.lower(token)
-      parts :: str.split(v, ",")
+      want := str.lower(token)
+      parts := str.split(v, ",")
       while { xs: parts, want: want } {
         (xs, want) ~> match xs {
           []: { out: false },
@@ -320,20 +320,20 @@ export head_end := (buf) ~> while { i: 0, n: bytes.len(buf) } {
 --- @returns {UrlIn - { host: String, port: Int, path: String,
 ---   scheme: String }}
 export parse_url := (s) ~> do {
-  wss :: str.starts_with(s, "wss://")
-  ws :: str.starts_with(s, "ws://")
+  wss := str.starts_with(s, "wss://")
+  ws := str.starts_with(s, "ws://")
   if ws == false && wss == false {
     error.raise("ws-whatwg-c: only ws:// and wss:// URLs are supported")
   } else {
     do {
-      scheme :: if wss { "wss" } else { "ws" }
-      rest :: str.slice(s, if wss { 6 } else { 5 }, str.length(s))
-      slash :: str.find(rest, "/")
-      authority :: if slash < 0 { rest } else { str.slice(rest, 0, slash) }
-      path :: if slash < 0 { "/" } else { str.slice(rest, slash, str.length(rest)) }
-      colon :: str.find(authority, ":")
-      host :: if colon < 0 { authority } else { str.slice(authority, 0, colon) }
-      port :: if colon < 0 { if wss { 443 } else { 80 } } else {
+      scheme := if wss { "wss" } else { "ws" }
+      rest := str.slice(s, if wss { 6 } else { 5 }, str.length(s))
+      slash := str.find(rest, "/")
+      authority := if slash < 0 { rest } else { str.slice(rest, 0, slash) }
+      path := if slash < 0 { "/" } else { str.slice(rest, slash, str.length(rest)) }
+      colon := str.find(authority, ":")
+      host := if colon < 0 { authority } else { str.slice(authority, 0, colon) }
+      port := if colon < 0 { if wss { 443 } else { 80 } } else {
         nat_of(str.slice(authority, colon + 1, str.length(authority)))
       }
       if str.length(host) == 0 {
