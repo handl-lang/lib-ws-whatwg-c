@@ -9,7 +9,7 @@ src/        the .hnl sources
 pkg.hnl     package manifest — modules, deps, description, license
 scripts/hnl-gate.sh   the gate
 scripts/curl_ws_check.py   live curl websocket check
-ci.sh       bupha entry
+workflows/gate.yaml       bupha entry (handl-gates)
 ```
 
 ## Gate
