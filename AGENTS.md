@@ -12,7 +12,7 @@ WHATWG WebSocket surface over the libcurl transport — the
 | `pkg.hnl` | package manifest — `modules: ["http"]` |
 | `scripts/hnl-gate.sh` | the gate |
 | `scripts/curl_ws_check.py` | live curl websocket check |
-| `ci.sh` | bupha entry |
+| `workflows/gate.yaml` | bupha entry (handl-gates) |
 
 ## Contract
 
@@ -24,7 +24,7 @@ WHATWG WebSocket surface over the libcurl transport — the
 
 ```bash
 HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
-./ci.sh
+# bupha entry: workflows/gate.yaml (handl-gates campaign)
 python3 scripts/curl_ws_check.py   # live check, needs a WS endpoint
 ```
 
